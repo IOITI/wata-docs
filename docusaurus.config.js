@@ -18,7 +18,7 @@ const config = {
   url: 'https://ioiti.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/wata/',
+  baseUrl: '/wata-docs/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -73,7 +73,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/IOITI/wata/tree/main/website/',
+            'https://github.com/IOITI/wata-docs/tree/main/',
         },
         blog: {},
         theme: {

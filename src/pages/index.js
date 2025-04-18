@@ -80,7 +80,7 @@ function HomepageHeader() {
           </div>
           <div className={styles.heroRight}>
             <AnimatedTrader 
-              logoSrc="/wata/img/wata_logo.png"
+              logoSrc="/wata-docs/img/wata_logo.png"
               width={200}
             />
           </div>

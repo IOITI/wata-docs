@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Background Panel -->
+        <rect fill="#F6F8FA" x="30" y="30" width="140" height="140" rx="5"></rect>
+        
+        <!-- Chart Grid Lines -->
+        <line x1="30" y1="50" x2="170" y2="50" stroke="#E4E6EB" stroke-width="1"></line>
+        <line x1="30" y1="80" x2="170" y2="80" stroke="#E4E6EB" stroke-width="1"></line>
+        <line x1="30" y1="110" x2="170" y2="110" stroke="#E4E6EB" stroke-width="1"></line>
+        <line x1="30" y1="140" x2="170" y2="140" stroke="#E4E6EB" stroke-width="1"></line>
+        
+        <line x1="50" y1="30" x2="50" y2="170" stroke="#E4E6EB" stroke-width="1"></line>
+        <line x1="80" y1="30" x2="80" y2="170" stroke="#E4E6EB" stroke-width="1"></line>
+        <line x1="110" y1="30" x2="110" y2="170" stroke="#E4E6EB" stroke-width="1"></line>
+        <line x1="140" y1="30" x2="140" y2="170" stroke="#E4E6EB" stroke-width="1"></line>
+        
+        <!-- Chart Bars -->
+        <rect fill="#3578E5" x="45" y="140" width="10" height="30"></rect>
+        <rect fill="#3578E5" x="75" y="110" width="10" height="60"></rect>
+        <rect fill="#3578E5" x="105" y="80" width="10" height="90"></rect>
+        <rect fill="#3578E5" x="135" y="50" width="10" height="120"></rect>
+        
+        <!-- Line Chart -->
+        <polyline points="50,130 80,100 110,70 140,40" stroke="#25C2A0" stroke-width="3" fill="none"></polyline>
+        <circle fill="#25C2A0" cx="50" cy="130" r="4"></circle>
+        <circle fill="#25C2A0" cx="80" cy="100" r="4"></circle>
+        <circle fill="#25C2A0" cx="110" cy="70" r="4"></circle>
+        <circle fill="#25C2A0" cx="140" cy="40" r="4"></circle>
+        
+        <!-- Analytics Icons -->
+        <path d="M30,170 L40,170 L40,180 L30,180 Z" fill="#3578E5"></path>
+        <text x="45" y="178" font-family="Arial" font-size="10" fill="#3578E5">Trades</text>
+        
+        <circle fill="#25C2A0" cx="30" cy="190" r="5"></circle>
+        <text x="45" y="193" font-family="Arial" font-size="10" fill="#25C2A0">Returns</text>
+    </g>
+</svg> 

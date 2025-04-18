@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Robot Body -->
+        <rect fill="#3578E5" x="70" y="60" width="60" height="80" rx="10"></rect>
+        
+        <!-- Robot Head -->
+        <rect fill="#3578E5" x="80" y="30" width="40" height="30" rx="5"></rect>
+        
+        <!-- Robot Eyes -->
+        <circle fill="#FFFFFF" cx="90" cy="45" r="5"></circle>
+        <circle fill="#FFFFFF" cx="110" cy="45" r="5"></circle>
+        
+        <!-- Robot Antenna -->
+        <line x1="100" y1="30" x2="100" y2="15" stroke="#3578E5" stroke-width="3"></line>
+        <circle fill="#3578E5" cx="100" cy="10" r="5"></circle>
+        
+        <!-- Robot Arms -->
+        <line x1="70" y1="80" x2="40" y2="100" stroke="#3578E5" stroke-width="4"></line>
+        <line x1="130" y1="80" x2="160" y2="100" stroke="#3578E5" stroke-width="4"></line>
+        
+        <!-- Trading Symbols -->
+        <text x="35" y="115" font-family="Arial" font-size="18" fill="#25C2A0">$</text>
+        <text x="155" y="115" font-family="Arial" font-size="18" fill="#25C2A0">€</text>
+        
+        <!-- Chart Line -->
+        <polyline points="40,150 60,140 80,160 100,130 120,145 140,125 160,135" stroke="#25C2A0" stroke-width="3" fill="none"></polyline>
+    </g>
+</svg> 

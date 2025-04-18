@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwata_docs=self.webpackChunkwata_docs||[]).push([[8313],{694:(e,a,c)=>{c.d(a,{createPacketServices:()=>s.$});var s=c(9923);c(3579)}}]);

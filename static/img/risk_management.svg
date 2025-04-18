@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Shield -->
+        <path d="M100,30 L160,50 C160,120 140,160 100,180 C60,160 40,120 40,50 L100,30" fill="#EBF5FF" stroke="#3578E5" stroke-width="3"></path>
+        
+        <!-- Check Mark -->
+        <path d="M75,100 L90,120 L125,80" stroke="#25C2A0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>
+        
+        <!-- Stop Loss Line -->
+        <line x1="50" y1="140" x2="150" y2="140" stroke="#FF6B6B" stroke-width="3" stroke-dasharray="5,5"></line>
+        <text x="155" y="145" font-family="Arial" font-size="12" fill="#FF6B6B">SL</text>
+        
+        <!-- Take Profit Line -->
+        <line x1="50" y1="70" x2="150" y2="70" stroke="#25C2A0" stroke-width="3" stroke-dasharray="5,5"></line>
+        <text x="155" y="75" font-family="Arial" font-size="12" fill="#25C2A0">TP</text>
+        
+        <!-- Percentage Signs -->
+        <text x="60" y="65" font-family="Arial" font-size="12" fill="#25C2A0">+15%</text>
+        <text x="60" y="155" font-family="Arial" font-size="12" fill="#FF6B6B">-8%</text>
+    </g>
+</svg> 

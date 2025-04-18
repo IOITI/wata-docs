@@ -1,0 +1,190 @@
+/* Import funky fonts - Archivo for base and Poppins for accent elements */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap');
+
+/* Funky Animation Keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes rainbow-text {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+:root {
+  /* Funky Primary Colors */
+  --ifm-color-primary: #6a0dad;
+  --ifm-color-primary-dark: #5c0c93;
+  --ifm-color-primary-darker: #4c0a7a;
+  --ifm-color-primary-darkest: #3c0861;
+  --ifm-color-primary-light: #7c0fc8;
+  --ifm-color-primary-lighter: #8f14e0;
+  --ifm-color-primary-lightest: #a01ff7;
+
+  /* Vibrant Accent Colors */
+  --wata-color-profit: #00ffaa;  /* Neon Green */
+  --wata-color-loss: #ff3864;    /* Hot Pink */
+  --wata-color-neutral: #c5b4e3; /* Lavender */
+
+  /* Funky Accents */
+  --wata-color-accent-1: #fd0; /* Electric Yellow */
+  --wata-color-accent-2: #ff00cc; /* Magenta */
+  --wata-color-accent-3: #00ffd5; /* Cyan */
+  --wata-color-accent-4: #b967ff; /* Purple */
+
+  /* UI Elements */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(106, 13, 173, 0.1);
+
+  --ifm-navbar-background-color: rgba(255, 255, 255, 0.9);
+  --ifm-navbar-link-hover-color: var(--wata-color-accent-2);
+  
+  --ifm-footer-background-color: #120458;
+  --ifm-footer-title-color: #ffffff;
+  --ifm-footer-link-color: #d1d1d1;
+
+  /* Typography */
+  --ifm-font-family-base: 'Archivo', sans-serif;
+  --ifm-heading-font-family: 'Poppins', sans-serif;
+  --ifm-heading-font-weight: 700;
+
+  /* Card & UI Component Styling */
+  --ifm-card-background-color: rgba(255, 255, 255, 0.8);
+  --ifm-card-border-radius: 16px;
+  --ifm-global-radius: 8px;
+  --ifm-global-shadow-md: 0 8px 20px rgba(106, 13, 173, 0.15);
+
+  --ifm-alert-border-radius: 12px;
+  --ifm-alert-padding-vertical: 1rem;
+
+  /* Funky Extras */
+  --wata-gradient-primary: linear-gradient(45deg, #6a0dad, #ff3864, #fd0);
+  --wata-gradient-text: linear-gradient(to right, #ff00cc, #3399ff, #00ffd5);
+  --wata-button-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+  --wata-skew-angle: -5deg;
+}
+
+/* Add funky general styles */
+html {
+  scroll-behavior: smooth;
+}
+
+h1, h2, h3 {
+  position: relative;
+}
+
+h1::after,
+h2::after {
+  content: "";
+  position: absolute;
+  bottom: -0.1em;
+  left: 0;
+  width: -webkit-fill-available;
+  height: 0.06em;
+  background: var(--wata-gradient-primary);
+  background-size: 200% 200%;
+  animation: rainbow-text 3s ease infinite;
+}
+
+.navbar__title {
+  font-family: var(--ifm-heading-font-family);
+  font-weight: 800;
+  background: var(--wata-gradient-text);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow-text 3s ease infinite;
+}
+
+.button--primary {
+  background: var(--wata-gradient-primary);
+  background-size: 200% 200%;
+  animation: rainbow-text 3s ease infinite;
+  border: none;
+  transform: skew(var(--wata-skew-angle));
+  box-shadow: var(--wata-button-shadow);
+  transition: all 0.3s ease;
+}
+
+.button--primary:hover {
+  transform: skew(var(--wata-skew-angle)) translateY(-5px);
+  box-shadow: 8px 8px 0px rgba(0,0,0,0.3);
+}
+
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  box-shadow: var(--ifm-global-shadow-md);
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(106, 13, 173, 0.2);
+}
+
+/* Dark mode styles */
+[data-theme='dark'] {
+  --ifm-color-primary: #b967ff;
+  --ifm-color-primary-dark: #a54dfa;
+  --ifm-color-primary-darker: #9033f5;
+  --ifm-color-primary-darkest: #7a19f0;
+  --ifm-color-primary-light: #cc85ff;
+  --ifm-color-primary-lighter: #dca3ff;
+  --ifm-color-primary-lightest: #ecc1ff;
+
+  --wata-color-profit: #00ffc3;
+  --wata-color-loss: #ff4c8b;
+  --wata-color-neutral: #d8c9f7;
+
+  --wata-color-accent-1: #fff67a;
+  --wata-color-accent-2: #ff79c6;
+  --wata-color-accent-3: #50e3f1;
+  --wata-color-accent-4: #c988ff;
+
+  --ifm-background-color: #0a0118;
+  --ifm-navbar-background-color: rgba(12, 2, 26, 0.8);
+  --ifm-card-background-color: rgba(20, 5, 38, 0.7);
+
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.1);
+  
+  --wata-gradient-primary: linear-gradient(45deg, #b967ff, #ff4c8b, #fff67a);
+  --wata-button-shadow: 5px 5px 0px rgba(255, 255, 255, 0.1);
+}
+
+/* Funky scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--wata-gradient-primary);
+  border-radius: 6px;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: #0a0118;
+}
+
+/* Add navbar backdrop filter for glass effect */
+.navbar {
+  backdrop-filter: blur(10px);
+}
+
+/* Funky selection highlight */
+::selection {
+  background: var(--ifm-color-primary);
+  color: white;
+}

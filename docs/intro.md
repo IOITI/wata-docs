@@ -3,7 +3,7 @@ sidebar_position: 1
 ---
 # 💹 Welcome to WATA 
 
-<img src="/wata-docs/img/wata_header.png" alt="logo" width="400" />
+<img src="/wata-docs/img/wata_animated_banner.gif" alt="logo" width="1000" />
 
 Automated trading system for Saxo Bank's Knock-out warrants (Turbos), executing trades via webhook signals.
 

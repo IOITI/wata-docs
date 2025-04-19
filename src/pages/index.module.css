@@ -185,56 +185,110 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
 }
 
-.statItem {
-  text-align: center;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  transform: rotate(var(--rotation));
-  --rotation: 0deg;
+/* Flip Card Styles */
+.flipCard {
+  background-color: transparent;
+  perspective: 1000px;
+  height: 300px;
+  width: 100%;
   opacity: 0;
-  transform: translateY(20px) rotate(var(--rotation));
-  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
   transition-delay: calc(var(--index) * 0.2s);
 }
 
-.visible .statItem:nth-child(1) {
-  --index: 1;
-  --rotation: -3deg;
-}
+.visible .flipCard:nth-child(1) { --index: 1; }
+.visible .flipCard:nth-child(2) { --index: 2; }
+.visible .flipCard:nth-child(3) { --index: 3; }
+.visible .flipCard:nth-child(4) { --index: 4; }
+.visible .flipCard:nth-child(5) { --index: 5; }
+.visible .flipCard:nth-child(6) { --index: 6; }
 
-.visible .statItem:nth-child(2) {
-  --index: 2;
-  --rotation: 0deg;
-}
-
-.visible .statItem:nth-child(3) {
-  --index: 3;
-  --rotation: 3deg;
-}
-
-.visible .statItem {
+.visible .flipCard {
   opacity: 1;
-  transform: translateY(0) rotate(var(--rotation));
+  transform: translateY(0);
 }
 
-.statItem:hover {
-  transform: rotate(var(--rotation)) scale(1.1);
-  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.4);
+.flipCardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+  border-radius: 20px;
+}
+
+.flipCard:hover .flipCardInner {
+  transform: rotateY(180deg);
+}
+
+/* This will make the card stay flipped after hover */
+.flipCard .flipCardInner.flipped,
+.flipCard:focus-within .flipCardInner {
+  transform: rotateY(180deg);
+}
+
+.flipCardFront, .flipCardBack {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.flipCardFront {
+  background: linear-gradient(135deg, #6a0dad, #ff3864);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.frontContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.frontContent span {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+}
+
+.hoverHint {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  position: absolute;
+  bottom: 20px;
+  font-style: italic;
+}
+
+.flipCardBack {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: white;
+  transform: rotateY(180deg);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .statNumber {
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #ff3864;
   margin-bottom: 0.5rem;
@@ -246,7 +300,6 @@
   color: #00ffcc;
   font-weight: 600;
   letter-spacing: 1.5px;
-  text-transform: uppercase;
 }
 
 /* CTA Section */
@@ -306,70 +359,82 @@
 /* Responsive Adjustments */
 @media screen and (max-width: 996px) {
   .heroBanner {
-    padding: 4rem 2rem;
-    min-height: auto;
+    padding: 3rem 0;
   }
-  
+
   .heroContent {
     flex-direction: column;
     text-align: center;
-    transform: skewY(0deg);
   }
-  
+
   .heroLeft {
-    order: 2;
-    margin-top: 2rem;
-    transform: rotate(0deg);
-  }
-  
-  .heroRight {
-    order: 1;
+    max-width: 100%;
     margin-bottom: 2rem;
-    transform: rotate(0deg);
   }
-  
+
+  .heroRight {
+    max-width: 100%;
+  }
+
   .heroImage {
-    max-width: 70%;
+    max-width: 80%;
   }
-  
+
   .heroTitle {
-    font-size: 2.5rem;
+    font-size: 4rem;
   }
-  
+
   .heroSubtitle {
     font-size: 1.2rem;
   }
-  
+
   .buttons {
     justify-content: center;
-    transform: rotate(0deg);
   }
-  
+
   .statGrid {
-    grid-template-columns: 1fr;
-    max-width: 400px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
   }
-  
-  .statItem {
-    transform: rotate(0deg) !important;
+
+  .flipCard {
+    height: 250px;
   }
-  
-  .statItem:hover {
-    transform: rotate(0deg) scale(1.05) !important;
+
+  .frontContent span {
+    font-size: 2rem;
+  }
+
+  .statNumber {
+    font-size: 1.8rem;
+  }
+
+  .statLabel {
+    font-size: 1rem;
   }
 }
 
 @media screen and (max-width: 768px) {
   .heroImage {
-    max-width: 80%;
+    max-width: 70%;
   }
-  
+
   .ctaTitle {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
-  
+
   .ctaDescription {
     font-size: 1rem;
+  }
+
+  .statGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .flipCard {
+    height: 220px;
+    max-width: 350px;
+    margin: 0 auto;
   }
 }
 
@@ -567,7 +632,7 @@
   width: 80px;
   height: 60px;
   object-fit: contain;
-  filter: drop-shadow(0 0 5px rgba(0, 255, 204, 0.8));
+  filter: brightness(0) saturate(100%) invert(100%) saturate(3786%) hue-rotate(270deg) brightness(100%) contrast(100%) drop-shadow(0 0 14px rgb(0, 72, 255));
 }
 
 .fluxLabel {

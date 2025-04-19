@@ -92,6 +92,7 @@ function HomepageHeader() {
 
 function StatisticsSection() {
   const [visible, setVisible] = useState(false);
+  const [flippedCards, setFlippedCards] = useState({});
   
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -114,43 +115,93 @@ function StatisticsSection() {
     };
   }, []);
   
+  const handleCardFlip = (index) => {
+    setFlippedCards(prev => ({
+      ...prev,
+      [index]: true
+    }));
+  };
+  
+  const resetCards = (e) => {
+    // Only reset if clicking directly on the section or container, not on cards
+    if (e.target.className === styles.statistics || 
+        e.target.className === 'container' ||
+        e.target.className === styles.statGrid) {
+      setFlippedCards({});
+    }
+  };
+  
+  const cards = [
+    {
+      front: "WATA Secret",
+      back: {
+        title: "No manual trade",
+        description: "But you need a strategy"
+      }
+    },
+    {
+      front: "WATA Secret",
+      back: {
+        title: "0% FOMO TRADE",
+        description: "WATA doesn't read Reddit tips"
+      }
+    },
+    {
+      front: "WATA Secret",
+      back: {
+        title: "99.9% Uptime",
+        description: "Unlike your trading discipline"
+      }
+    },
+    {
+      front: "WATA Secret",
+      back: {
+        title: "Instant Trade Alerts",
+        description: "Bad news delivered faster than ever"
+      }
+    },
+    {
+      front: "WATA Secret",
+      back: {
+        title: "Systematic Execution",
+        description: "No 'just one more trade' syndrome"
+      }
+    },
+    {
+      front: "WATA Secret",
+      back: {
+        title: "Limited Diversification",
+        description: "Because you'll probably just use one asset"
+      }
+    }
+  ];
+  
   return (
-    <section className={clsx(styles.statistics, {[styles.visible]: visible})}>
+    <section className={clsx(styles.statistics, {[styles.visible]: visible})} onClick={resetCards}>
       <div className="container">
         <div className={styles.statGrid}>
-          <div className={styles.statItem}>
-            <div className={styles.statNumber}>No manual trade</div>
-            <div className={styles.statLabel}></div>
-            <div className={styles.statLabel}>---</div>
-            <div className={styles.statLabel}>But you need a strategy</div>
-          </div>
-          <div className={styles.statItem}>
-            <div className={styles.statNumber}>0% FOMO TRADE</div>
-            <div className={styles.statLabel}>---</div>
-            <div className={styles.statLabel}>WATA doesn't</div>
-            <div className={styles.statLabel}>read Reddit tips</div>
-          </div>
-          <div className={styles.statItem}>
-            <div className={styles.statNumber}>99.9% Uptime</div>
-            <div className={styles.statLabel}>---</div>
-            <div className={styles.statLabel}>Unlike your trading discipline</div>
-          </div>
-          <div className={styles.statItem}>
-            <div className={styles.statNumber}>Instant Trade Alerts</div>
-            <div className={styles.statLabel}>---</div>
-            <div className={styles.statLabel}>Bad news delivered faster than ever</div>
-          </div>
-          <div className={styles.statItem}>
-            <div className={styles.statNumber}>Systematic Execution</div>
-            <div className={styles.statLabel}>---</div>
-            <div className={styles.statLabel}>No</div>
-            <div className={styles.statLabel}>'just one more trade' syndrome</div>
-          </div>
-          <div className={styles.statItem}>
-            <div className={styles.statNumber}>Limited Diversification</div>
-            <div className={styles.statLabel}>---</div>
-            <div className={styles.statLabel}>Because you'll probably just use one asset</div>
-          </div>
+          {cards.map((card, index) => (
+            <div 
+              key={index} 
+              className={styles.flipCard}
+              onMouseEnter={() => handleCardFlip(index)}
+              tabIndex="0"
+            >
+              <div className={clsx(styles.flipCardInner, {[styles.flipped]: flippedCards[index]})}>
+                <div className={styles.flipCardFront}>
+                  <div className={styles.frontContent}>
+                    <span>{card.front}</span>
+                    <div className={styles.hoverHint}>Hover to reveal</div>
+                  </div>
+                </div>
+                <div className={styles.flipCardBack}>
+                  <div className={styles.statNumber}>{card.back.title}</div>
+                  <div className={styles.statLabel}>---</div>
+                  <div className={styles.statLabel}>{card.back.description}</div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -181,7 +232,7 @@ function CTASection() {
             <Link
               className={clsx('button button--lg', styles.primaryButton)}
               to="/docs/intro">
-              Start Now
+              Start Now 🌅
             </Link>
           </div>
         </div>

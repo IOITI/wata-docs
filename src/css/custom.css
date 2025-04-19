@@ -71,6 +71,11 @@
   --wata-gradient-secondary: linear-gradient(45deg, #ff00cc, #3399ff, #00ffd5);
   --wata-button-shadow: 5px 5px 0px rgba(0,0,0,0.2);
   --wata-skew-angle: -5deg;
+  
+  /* Z-index values */
+  --ifm-z-index-dropdown: 100;
+  --ifm-z-index-fixed: 200;
+  --ifm-z-index-overlay: 400;
 }
 
 /* Add funky general styles */

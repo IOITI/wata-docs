@@ -35,9 +35,9 @@
   --wata-color-neutral: #c5b4e3; /* Lavender */
 
   /* Funky Accents */
-  --wata-color-accent-1: #fd0; /* Electric Yellow */
+  --wata-color-accent-1: #ffae00; /* Electric Yellow */
   --wata-color-accent-2: #ff00cc; /* Magenta */
-  --wata-color-accent-3: #00ffd5; /* Cyan */
+  --wata-color-accent-3: #00eddb; /* Cyan */
   --wata-color-accent-4: #b967ff; /* Purple */
 
   /* UI Elements */
@@ -68,6 +68,7 @@
   /* Funky Extras */
   --wata-gradient-primary: linear-gradient(45deg, #6a0dad, #ff3864, #fd0);
   --wata-gradient-text: linear-gradient(to right, #ff00cc, #3399ff, #00ffd5);
+  --wata-gradient-secondary: linear-gradient(45deg, #ff00cc, #3399ff, #00ffd5);
   --wata-button-shadow: 5px 5px 0px rgba(0,0,0,0.2);
   --wata-skew-angle: -5deg;
 }
@@ -75,6 +76,29 @@
 /* Add funky general styles */
 html {
   scroll-behavior: smooth;
+}
+
+/* Custom navbar logo size */
+.navbar__logo img {
+  width: 70px;
+  height: auto;
+  margin-top: -13px;
+  margin-left: -10px;
+  /* Change SVG color - Method 1: Using filters */
+  filter: brightness(0) saturate(100%) invert(20%) sepia(99%) saturate(3786%) hue-rotate(270deg) brightness(80%) contrast(100%) drop-shadow(0 0 14px rgb(0, 72, 255));
+}
+
+/* Apply different color for dark mode */
+[data-theme='dark'] .navbar__logo img {
+  /* Change to a lighter color in dark mode */
+  filter: brightness(0) saturate(100%) invert(83%) sepia(32%) saturate(7154%) hue-rotate(242deg) brightness(101%) contrast(101%) drop-shadow(0 0 6px #ffaa00);
+}
+
+/* Custom position for logo container */
+.navbar__logo {
+  position: relative;
+  top: -2px;
+  left: -5px;
 }
 
 h1, h2, h3 {
@@ -85,23 +109,53 @@ h1::after,
 h2::after {
   content: "";
   position: absolute;
-  bottom: -0.1em;
+  bottom: -0.3em;
   left: 0;
   width: -webkit-fill-available;
   height: 0.06em;
   background: var(--wata-gradient-primary);
   background-size: 200% 200%;
   animation: rainbow-text 3s ease infinite;
+  filter: drop-shadow(0 0 4px rgba(255, 0, 204, 0.8)) drop-shadow(0 0 4px rgba(255, 234, 0, 0.8));
+}
+
+h1::after {
+  bottom: -0.1em;
 }
 
 .navbar__title {
   font-family: var(--ifm-heading-font-family);
   font-weight: 800;
+  font-size: 1.5rem;
   background: var(--wata-gradient-text);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: rainbow-text 3s ease infinite;
+  transform: skewY(-2deg);
+  margin-left: -12px;
+}
+
+.navbar__link {
+  background: var(--wata-gradient-secondary);
+  background-size: 200% 200%;
+  animation: rainbow-text 13s ease infinite;
+  border: none;
+  border-radius: 10px;
+  transform: skew(var(--wata-skew-angle));
+  box-shadow: var(--wata-button-shadow);
+  transition: all 0.3s ease;
+}
+
+.navbar__link:hover, .navbar__link--active {
+  background: var(--wata-gradient-primary);
+  color: white;
+  background-size: 200% 200%;
+  animation: rainbow-text 13s ease infinite;
+  border: none;
+  transform: skew(var(--wata-skew-angle));
+  box-shadow: var(--wata-button-shadow);
+  transition: all 0.3s ease;
 }
 
 .button--primary {
@@ -131,6 +185,107 @@ h2::after {
   box-shadow: 0 15px 30px rgba(106, 13, 173, 0.2);
 }
 
+/* Enhanced Sidebar Category Styles */
+.menu__list-item-collapsible {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  position: relative;
+}
+
+.menu__list-item-collapsible:hover {
+  background-color: rgba(106, 13, 173, 0.1);
+}
+
+.menu__list-item-collapsible .menu__link {
+  font-family: var(--ifm-heading-font-family);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Apply color and glow to all category links */
+.menu__list > .menu__list-item:nth-child(1) .menu__list-item-collapsible .menu__link {
+  color: var(--wata-color-accent-1);
+  filter: drop-shadow(0 0 10px rgba(255, 174, 0, 0.8));
+}
+
+.menu__list > .menu__list-item:nth-child(2) .menu__list-item-collapsible .menu__link {
+  color: var(--wata-color-accent-2);
+  filter: drop-shadow(0 0 10px rgba(255, 0, 204, 0.8));
+}
+
+.menu__list > .menu__list-item:nth-child(3) .menu__list-item-collapsible .menu__link {
+  color: var(--wata-color-accent-3);
+  filter: drop-shadow(0 0 10px rgba(0, 255, 213, 0.8));
+}
+
+.menu__list > .menu__list-item:nth-child(4) .menu__list-item-collapsible .menu__link {
+  color: var(--wata-color-accent-4);
+  filter: drop-shadow(0 0 10px rgba(185, 103, 255, 0.8));
+}
+
+.menu__list > .menu__list-item:nth-child(5) .menu__list-item-collapsible .menu__link {
+  color: var(--wata-color-profit);
+  filter: drop-shadow(0 0 10px rgba(0, 255, 170, 0.8));
+}
+
+/* Keep the colored borders for categories */
+.menu__list-item-collapsible::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: var(--wata-gradient-primary);
+  background-size: 200% 200%;
+  border-radius: 0 4px 4px 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menu__list-item-collapsible:hover::before {
+  opacity: 1;
+}
+
+/* Different colors for each category border */
+.menu__list > .menu__list-item:nth-child(1) .menu__list-item-collapsible::before {
+  background: linear-gradient(45deg, var(--wata-color-accent-1), var(--ifm-color-primary));
+}
+
+.menu__list > .menu__list-item:nth-child(2) .menu__list-item-collapsible::before {
+  background: linear-gradient(45deg, var(--wata-color-accent-2), var(--ifm-color-primary));
+}
+
+.menu__list > .menu__list-item:nth-child(3) .menu__list-item-collapsible::before {
+  background: linear-gradient(45deg, var(--wata-color-accent-3), var(--ifm-color-primary));
+}
+
+.menu__list > .menu__list-item:nth-child(4) .menu__list-item-collapsible::before {
+  background: linear-gradient(45deg, var(--wata-color-accent-4), var(--ifm-color-primary));
+}
+
+.menu__list > .menu__list-item:nth-child(5) .menu__list-item-collapsible::before {
+  background: linear-gradient(45deg, var(--wata-color-profit), var(--ifm-color-primary));
+}
+
+.menu__link--active:not(.menu__link--sublist) {
+  border-left: 3px solid var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+.menu__caret:before,
+.menu__link--sublist-caret:after {
+  transition: transform 0.3s ease;
+}
+
+.menu__list-item--collapsed .menu__caret:before,
+.menu__list-item--collapsed .menu__link--sublist-caret:after {
+  transform: rotateZ(-90deg);
+}
+
 /* Dark mode styles */
 [data-theme='dark'] {
   --ifm-color-primary: #b967ff;
@@ -158,6 +313,10 @@ h2::after {
   
   --wata-gradient-primary: linear-gradient(45deg, #b967ff, #ff4c8b, #fff67a);
   --wata-button-shadow: 5px 5px 0px rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .menu__list-item-collapsible:hover {
+  background-color: rgba(185, 103, 255, 0.15);
 }
 
 /* Funky scrollbar */

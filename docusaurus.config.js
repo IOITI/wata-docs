@@ -92,14 +92,14 @@ const config = {
         title: 'WATA',
         logo: {
           alt: 'WATA Logo',
-          src: 'img/wata_logo.png',
+          src: 'img/wata_logo.svg',
         },
         items: [
           {
             type: 'docSidebar',
             sidebarId: 'tutorialSidebar',
             position: 'left',
-            label: 'Documentation',
+            label: '📚Documentation',
           },
           {
             href: 'https://github.com/IOITI/wata',

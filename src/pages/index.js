@@ -80,7 +80,7 @@ function HomepageHeader() {
           </div>
           <div className={styles.heroRight}>
             <AnimatedTrader 
-              logoSrc="/wata-docs/img/wata_logo.png"
+              logoSrc="/wata-docs/img/wata_logo.svg"
               width={200}
             />
           </div>
@@ -190,6 +190,83 @@ function CTASection() {
   );
 }
 
+function FluxSchemaSection() {
+  const [animate, setAnimate] = useState(false);
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setAnimate(true);
+        }
+      });
+    }, { threshold: 0.2 });
+    
+    const element = document.querySelector(`.${styles.fluxSchema}`);
+    if (element) {
+      observer.observe(element);
+    }
+    
+    return () => {
+      if (element) {
+        observer.unobserve(element);
+      }
+    };
+  }, []);
+  
+  return (
+    <section className={styles.fluxSchema}>
+      <div className="container">
+        <Heading as="h2" className={styles.fluxTitle}>
+          <GlitchText text="How WATA Works" />
+        </Heading>
+        
+        <div className={styles.fluxContainer}>
+          <div className={styles.fluxNode}>
+            <div className={styles.fluxIcon}>
+              <img src="/wata-docs/img/tradingview-logo.svg" alt="TradingView" />
+              <div className={styles.fluxLabel}>Signal Source</div>
+            </div>
+          </div>
+          
+          <div className={clsx(styles.fluxPath, {[styles.animatePath]: animate})}>
+            <div className={styles.fluxLight}></div>
+            <div className={styles.fluxArrow}></div>
+            <div className={styles.fluxConnectionLabel}>Webhook Signals</div>
+          </div>
+          
+          <div className={styles.fluxNode}>
+            <div className={styles.fluxIcon}>
+              <img src="/wata-docs/img/wata_logo.svg" alt="WATA" />
+              <div className={styles.fluxLabel}>WATA</div>
+            </div>
+          </div>
+          
+          <div className={clsx(styles.fluxPath, {[styles.animatePath]: animate})}>
+            <div className={styles.fluxLight}></div>
+            <div className={styles.fluxArrow}></div>
+            <div className={styles.fluxConnectionLabel}>API Requests</div>
+          </div>
+          
+          <div className={styles.fluxNode}>
+            <div className={styles.fluxIcon}>
+              <img src="/wata-docs/img/saxo-logo.svg" alt="Saxo Bank" />
+              <div className={styles.fluxLabel}>Saxo Bank</div>
+            </div>
+          </div>
+        </div>
+        <div className={styles.ctaButtons}>
+            <Link
+              className={clsx('button button--lg', styles.primaryButton)}
+              to="/docs/architecture">
+              📚 Look at the architecture
+            </Link>
+          </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const {siteConfig} = useDocusaurusContext();
   return (
@@ -200,6 +277,7 @@ export default function Home() {
       <StatisticsSection />
       <main>
         <HomepageFeatures />
+        <FluxSchemaSection />
       </main>
       <CTASection />
     </Layout>

@@ -318,6 +318,97 @@ function FluxSchemaSection() {
   );
 }
 
+function TestimonialsSection() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  
+  const testimonials = [
+    {
+      quote: "WATA has completely transformed my trading strategy. The automated execution removes all emotional bias from my trades. I'm now able to execute my signals 24/7 without having to monitor the markets constantly. WATA's integration with Saxo Bank makes it truly unique. It executes my TradingView signals flawlessly.",
+      author: "Me",
+      title: "Day Trader",
+      avatarUrl: "/wata-docs/img/me.jpeg"
+    },
+    {
+      quote: "I don't understand what this dude is doing, he just tell me `we have lost €30`!! 😡",
+      author: "My wife",
+      title: "Home task trader",
+      avatarUrl: "/wata-docs/img/testimonial-wife.png"
+    },
+    {
+      quote: "WATA ? AHAHA ! Good name for a project ! 😂",
+      author: "My friends",
+      title: "Burger flipper addict",
+      avatarUrl: "/wata-docs/img/testimonial-friends.png"
+    },
+    {
+      quote: "Please ! Please ! Please ! Just write test cases for this code !",
+      author: "Source Code",
+      title: "Maestro",
+      avatarUrl: "/wata-docs/img/testimonial-app.png"
+    }
+  ];
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((current) => (current + 1) % testimonials.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
+  
+  return (
+    <section className={styles.testimonials}>
+      <div className="container">
+        <Heading as="h2" className={styles.testimonialTitle}>
+          <GlitchText text="What Traders Say" />
+        </Heading>
+        
+        <div className={styles.testimonialSlider}>
+          {testimonials.map((testimonial, index) => (
+            <div 
+              key={index}
+              className={clsx(
+                styles.testimonialCard, 
+                { [styles.activeTestimonial]: index === activeIndex }
+              )}
+            >
+              <div className={styles.testimonialQuote}>
+                <div className={styles.quoteSymbol}>"</div>
+                {testimonial.quote}
+                <div className={styles.quoteSymbol}>„</div>
+              </div>
+              
+              <div className={styles.testimonialAuthor}>
+                <div className={styles.authorAvatar}>
+                  <img src={testimonial.avatarUrl || "/wata-docs/img/wata_logo.svg"} alt={testimonial.author} />
+                </div>
+                <div className={styles.authorInfo}>
+                  <div className={styles.authorName}>{testimonial.author}</div>
+                  <div className={styles.authorTitle}>{testimonial.title}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className={styles.testimonialDots}>
+          {testimonials.map((_, index) => (
+            <button
+              key={index}
+              className={clsx(
+                styles.testimonialDot,
+                { [styles.activeDot]: index === activeIndex }
+              )}
+              onClick={() => setActiveIndex(index)}
+              aria-label={`View testimonial ${index + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const {siteConfig} = useDocusaurusContext();
   return (
@@ -329,6 +420,7 @@ export default function Home() {
       <main>
         <HomepageFeatures />
         <FluxSchemaSection />
+        <TestimonialsSection />
       </main>
       <CTASection />
     </Layout>

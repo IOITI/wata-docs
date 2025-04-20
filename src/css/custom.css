@@ -163,6 +163,30 @@ h1::after {
   transition: all 0.3s ease;
 }
 
+.navbar__search-input {
+  border: 3px solid transparent;
+  border-radius: 100px;
+  background:
+    linear-gradient(var(--ifm-navbar-background-color), var(--ifm-navbar-background-color)) padding-box,
+    var(--wata-gradient-primary) border-box;
+  animation: rainbow-text 3s ease infinite;
+  transition: all 0.3s ease;
+  transform: skew(var(--wata-skew-angle));
+  filter: drop-shadow(0 0 3px rgba(255, 0, 204, 0.8)) drop-shadow(0 0 3px rgba(255, 234, 0, 0.8));
+  color: black;
+  padding: 0 0.5rem 0 1rem
+}
+
+.navbar__search-input:focus {
+  border: 3px solid transparent;
+  box-shadow: 0 0 15px rgba(106, 13, 173, 0.3);
+  outline: none;
+}
+
+[data-theme='dark'] .navbar__search-input {
+  color: white;
+}
+
 .button--primary {
   background: var(--wata-gradient-primary);
   background-size: 200% 200%;

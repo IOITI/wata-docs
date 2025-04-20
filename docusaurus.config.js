@@ -108,7 +108,7 @@ const config = {
           },
           {
             href: 'https://github.com/IOITI/wata',
-            label: 'GitHub',
+            label: '🩴 GitHub',
             position: 'right',
           },
           {

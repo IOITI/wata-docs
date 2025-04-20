@@ -53,11 +53,29 @@ WATA uses a JSON configuration file (`config.json`) located in the `etc/` direct
 "webserver": {
   "persistant": {
     "token_path": "/app/var/lib/web_server/persist_token.json"
-  }
+  },
+  "app_secret": "CHANGE_THIS_TO_A_STRONG_SECRET_KEY"
 }
 ```
 
-- **persistant.token_path**: Path to store webhook authentication tokens
+- **persistant.token_path**: Path to store webhook authentication tokens (encrypted)
+- **app_secret**: Secret key used for token encryption (change this to a strong, unique value)
+
+### Managing Webhook Tokens
+
+WATA provides a command-line tool to manage your webhook tokens:
+
+- **View your current token**: 
+  ```bash
+  watawebtoken
+  ```
+
+- **Generate a new token**: 
+  ```bash
+  watawebtoken --new
+  ```
+
+The token must be included in webhook requests as a query parameter: `/webhook?token=YOUR_TOKEN`
 
 ## Logging
 

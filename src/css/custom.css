@@ -72,7 +72,7 @@
   --wata-button-shadow: 5px 5px 0px rgba(0,0,0,0.2);
   --wata-skew-angle: -5deg;
   
-  /* Z-index values */
+  /* Set proper z-index values */
   --ifm-z-index-dropdown: 100;
   --ifm-z-index-fixed: 200;
   --ifm-z-index-overlay: 400;
@@ -345,6 +345,12 @@ h1::after {
 /* Add navbar backdrop filter for glass effect */
 .navbar {
   backdrop-filter: blur(10px);
+}
+
+/* Fix mobile sidebar appearing behind content */
+/* Override Docusaurus mobile sidebar styles */
+.navbar-sidebar {
+  height: 100vh !important;
 }
 
 /* Funky selection highlight */

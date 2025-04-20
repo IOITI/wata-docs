@@ -27,7 +27,7 @@ const sidebars = {
       type: 'category',
       label: '📚 User Guides',
       collapsed: false,
-      items: ['deployment', 'how-to', 'configuration', 'saxo-authentication'],
+      items: ['deployment', 'how-to', 'configuration', 'saxo-authentication', 'web-server-token'],
     },
     {
       type: 'category',

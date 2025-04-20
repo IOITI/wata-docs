@@ -90,9 +90,16 @@ You can follow the instructions [here](https://gist.github.com/nafiesl/4ad622f34
     * In the alert settings, enable the "Webhook URL" option.
     * Enter the URL of your WATA web server: `http://<your_server_ip_or_domain>:<port>/webhook?token=YOUR_SECRET_TOKEN` (replace placeholders).
         * The `port` can be found in the `docker-compose.yml` file for the `web-server` service (usually 80).
-        * The `YOUR_SECRET_TOKEN` is **automatically generated** by WATA the first time the web server starts. You need to retrieve it from the persistent token file.
-        * Look inside your `/app/etc/config.json` file for the `webserver.persistant.token_path` value (default is `/app/var/lib/web_server/persist_token.json`).
-        * After starting WATA at least once (`watastart`), view the contents of that token file on your server to get the actual token value (e.g., using `cat /app/var/lib/web_server/persist_token.json`). Replace `YOUR_SECRET_TOKEN` in the TradingView URL with this value.
+        * The `YOUR_SECRET_TOKEN` is **automatically generated** by WATA the first time the web server starts.
+        * To view your current token, run:
+          ```bash
+          watawebtoken
+          ```
+        * To generate a new token (for increased security), run:
+          ```bash
+          watawebtoken --new
+          ```
+        * The token management command displays your token, which you should copy and use in your webhook URL.
     * In the "Message" box of the alert, provide the JSON payload WATA expects:
       ```json
       {

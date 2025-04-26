@@ -140,12 +140,14 @@
   border-radius: 30px;
   padding: 10px 22px;
   transform: skewX(10deg);
+  transition: .3s;
 }
 
 .secondaryButton:hover {
   background-color: rgba(0, 255, 204, 0.1);
   transform: skewX(10deg) translateY(-5px);
   border-style: solid;
+  transition: .3s;
 }
 
 /* Statistics Section */

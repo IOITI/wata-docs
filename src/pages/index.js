@@ -296,7 +296,7 @@ function FluxSchemaSection() {
           <div className={clsx(styles.fluxPath, {[styles.animatePath]: animate})}>
             <div className={styles.fluxLight}></div>
             <div className={styles.fluxArrow}></div>
-            <div className={styles.fluxConnectionLabel}>API Requests</div>
+            <div className={styles.fluxConnectionLabel}>Manage Instruments</div>
           </div>
           
           <div className={styles.fluxNode}>

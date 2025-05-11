@@ -81,7 +81,7 @@ You can follow the instructions [here](https://gist.github.com/nafiesl/4ad622f34
     * Monitor the logs (`watalogs`) or check your Telegram bot for the Saxo authentication URL.
     * Open the URL in your browser, log in to Saxo, and authorize the application.
     * Copy the `code` parameter from the redirect URL.
-    * Run `watasaxoauth <PASTE_THE_CODE_HERE>` on your server.
+    * Run `watasaxoauth` on your server (you will be prompted to enter the code securely)
 
 ## Step 5: Configure TradingView (or other signal source)
 
@@ -118,7 +118,7 @@ You can follow the instructions [here](https://gist.github.com/nafiesl/4ad622f34
    ```bash
    watastart
    watastatus # Check status
-   watasaxoauth <CODE> # Authenticate with Saxo Bank
+   watasaxoauth # Authenticate with Saxo Bank
    ```
 2. **Monitor**:
     * Keep an eye on your Telegram channel for notifications about received signals, trade executions, errors, and daily summaries.

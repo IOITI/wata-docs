@@ -25,9 +25,9 @@ This document explains how to authenticate with Saxo Bank API for the WATA appli
 
 6. On the server where WATA is installed, run the following command:
    ```
-   watasaxoauth <CODE>
+   watasaxoauth
    ```
-   Replace `<CODE>` with the authorization code you copied.
+   You'll be prompted to enter the authorization code securely (the code won't be visible when typing)
 
 7. The application will now continue with the authentication process using this code to obtain an access token.
 
@@ -44,8 +44,5 @@ Authorization code saved successfully! The application will now continue with th
 
 ## Command Reference
 
-- `watasaxoauth <CODE>`: Submits the authorization code to the application
-- `watastart`: Starts the application
-- `watastop`: Stops the application
-- `watalogs`: Shows application logs
-- `watastatus`: Shows application status 
+- `watasaxoauth`: Run this command and you'll be prompted to enter the authorization code securely (the code won't be visible when typing)
+- The authorization code is valid only for a short time (typically a few minutes)

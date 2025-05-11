@@ -93,7 +93,9 @@ Use these aliases to manage WATA on your server:
 - `watastop`: Stop the application
 - `watalogs`: View application logs
 - `watastatus`: Check application status
-- `watasaxoauth <CODE>`: Submit Saxo authentication code
+- `watasaxoauth`: Launch the secure authorization code submission process
+- `watawebtoken`: View your webhook authentication token
+- `watawebtoken --new`: Generate a new webhook token
 
 ## Docker Compose Architecture
 

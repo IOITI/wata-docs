@@ -87,7 +87,7 @@ sidebar_position: 5
     *   A: WATA uses OAuth 2.0. When authentication is needed (e.g., on first start or token expiry), the application will send an authorization URL via Telegram (or logs). You must open this URL, log in to Saxo, and authorize the application.
 ---
 * **Q: What do I do with the `code` parameter in the URL after authorizing Saxo?**
-    *   A: After successful authorization in your browser, you'll be redirected to a URL containing a `code=...` parameter. Copy the value of this code. Then, on your server, run the command `watasaxoauth <COPIED_CODE>`.
+    *   A: After successful authorization in your browser, you'll be redirected to a URL containing a `code=...` parameter. Copy the value of this code. Then, on your server, run the command `watasaxoauth`, and you'll be prompted to enter the authorization code securely (the code won't be visible when typing)
 ---
 * **Q: Did I need to re-authorize the app after each day/restart?**
     *   A: No, the app automatically handles token refresh. Token expires every 24 hours, so if the app is stopped for more than 24 hours, you'll need to re-authorize it again.

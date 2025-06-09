@@ -1,0 +1,1 @@
+duckdb -c "COPY (SELECT * EXCLUDE (order_id, position_id), FROM './src/turbo_data_position.parquet') TO './src/turbo_data_position.parquet' (FORMAT PARQUET);"

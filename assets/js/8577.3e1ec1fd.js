@@ -1,0 +1,1 @@
+(self.webpackChunkwata_docs=self.webpackChunkwata_docs||[]).push([[8577],{549:(s,a,c)=>{"use strict";c.d(a,{A:()=>t});var e=c(8291);const t=e},5741:()=>{}}]);

@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkwata_docs=self.webpackChunkwata_docs||[]).push([[2589],{2589:(s,a,c)=>{c.r(a)}}]);

@@ -107,6 +107,11 @@ const config = {
             label: '📚Documentation',
           },
           {
+            to: '/performance-dashboard',
+            label: '🌅 Public WATA Stats',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/IOITI/wata',
             label: '🩴 GitHub',
             position: 'right',

@@ -150,6 +150,7 @@ h1::after {
   transform: skew(var(--wata-skew-angle));
   box-shadow: var(--wata-button-shadow);
   transition: all 0.3s ease;
+  margin-right: 8px;
 }
 
 .navbar__link:hover, .navbar__link--active {

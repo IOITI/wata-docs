@@ -20,3 +20,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+observable-framework/dist/
+observable-framework/node_modules/

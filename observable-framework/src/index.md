@@ -7,6 +7,10 @@ sql:
   trade_performance: ./trade_performance.parquet
 ---
 
+```js
+import {GenericPerformanceCard} from "./components/cards.js";
+```
+
 ```sql id=profit_loss_data_full_time
 SELECT strptime(strftime(execution_time_close, '%Y/%m/%d'), '%Y/%m/%d') AS day_date,
        COUNT(*) AS trade_number,
@@ -54,7 +58,7 @@ GROUP BY year
 ```
 
 
-```sql id=streak_data
+```sql id=streak_data_all
 WITH profitable_days AS (
     SELECT 
         strptime(strftime(execution_time_close, '%Y/%m/%d'), '%Y/%m/%d') AS day_date,
@@ -150,8 +154,8 @@ ORDER BY Date;
 
 
 ```js
-const best_streak = streak_data.get(0).best_streak;
-const current_streak = streak_data.get(0).current_streak;
+const best_streak_1 = streak_data_all.get(0).best_streak;
+const current_streak_1 = streak_data_all.get(0).current_streak;
 ```
 
 ```js
@@ -362,6 +366,31 @@ ORDER BY
     date_trunc('month', execution_time_close);
 ```
 
+```sql id=weekly_performance_card
+SELECT
+    date_trunc('week', execution_time_close) as week_date,
+    STRFTIME(date_trunc('week', execution_time_close), 'Week %V, %Y') as week_display,
+    (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 AS week_pl_percentage
+FROM turbo_data_position
+GROUP BY 1
+ORDER BY 1 DESC
+LIMIT 52;
+```
+
+```sql id=weekly_performance_4_week
+SELECT
+    (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 as value
+FROM turbo_data_position
+WHERE execution_time_close >= (current_date - INTERVAL '4 weeks');
+```
+
+```sql id=weekly_performance_52_week
+SELECT
+    (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 as value
+FROM turbo_data_position
+WHERE execution_time_close >= (current_date - INTERVAL '52 weeks');
+```
+
 ```sql id=weekly_performance 
 SELECT
     date_trunc('week', execution_time_close) as week_date,
@@ -556,7 +585,9 @@ function weekly_performance_chart() {
 }
 ```
 
-```sql id=current_streak_performance
+
+```sql id=streak_comparison_performance
+-- CTE 1: Identify profitable and non-profitable days
 WITH profitable_days AS (
     SELECT 
         date_trunc('day', execution_time_close) AS day_date,
@@ -564,31 +595,74 @@ WITH profitable_days AS (
     FROM turbo_data_position
     WHERE position_status = 'Closed'
     GROUP BY day_date
+),
+-- CTE 2: Find the key dates that define our streak boundaries
+streak_boundaries AS (
+    SELECT
+        -- Find the last day that was NOT profitable.
+        (SELECT MAX(day_date) FROM profitable_days WHERE is_profitable_day = 0) AS last_losing_day,
+        -- Find the second-to-last day that was NOT profitable.
+        (SELECT day_date FROM profitable_days WHERE is_profitable_day = 0 ORDER BY day_date DESC LIMIT 1 OFFSET 1) AS second_to_last_losing_day
 )
+-- Part 1: Calculate metrics for the CURRENT streak
 SELECT 
+    'current' AS streak_type,
     SUM(position_profit_loss) AS streak_money_made,
     (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 AS streak_pl_percentage,
-    MIN(execution_time_close) AS streak_start_date, -- New: Get the first transaction time of the streak
-    MAX(execution_time_close) AS streak_end_date   -- New: Get the last transaction time of the streak
-FROM turbo_data_position
+    MIN(execution_time_close) AS streak_start_date,
+    MAX(execution_time_close) AS streak_end_date
+FROM 
+    turbo_data_position, streak_boundaries
 WHERE 
     position_status = 'Closed' 
-    AND date_trunc('day', execution_time_close) > (
-        -- Find the last day that was NOT profitable. The current streak starts the day after.
-        -- We use COALESCE to handle the case where there has never been a losing day.
-        SELECT COALESCE(MAX(day_date), '1970-01-01'::DATE)
-        FROM profitable_days
-        WHERE is_profitable_day = 0
-    )
+    -- The current streak includes all data AFTER the last losing day.
+    -- We use COALESCE to handle the case where there has never been a losing day.
+    AND date_trunc('day', execution_time_close) > COALESCE(streak_boundaries.last_losing_day, '1970-01-01'::DATE)
+
+UNION ALL
+
+-- Part 2: Calculate metrics for the PREVIOUS streak
+SELECT 
+    'previous' AS streak_type,
+    SUM(position_profit_loss) AS streak_money_made,
+    (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 AS streak_pl_percentage,
+    MIN(execution_time_close) AS streak_start_date,
+    MAX(execution_time_close) AS streak_end_date
+FROM 
+    turbo_data_position, streak_boundaries
+WHERE 
+    position_status = 'Closed' 
+    -- The previous streak is only valid if we have at least two losing days to create a boundary.
+    AND streak_boundaries.second_to_last_losing_day IS NOT NULL
+    -- The data must be BETWEEN the second-to-last and last losing days.
+    AND date_trunc('day', execution_time_close) > streak_boundaries.second_to_last_losing_day
+    AND date_trunc('day', execution_time_close) < streak_boundaries.last_losing_day;
 ```
 
 ```js
-// --- Data for Current Streak Performance ---
-const streak_perf = current_streak_performance.get(0);
-const streak_money_made = streak_perf?.streak_money_made ?? 0;
-const streak_pl_percentage = streak_perf?.streak_pl_percentage ?? 0;
-const streak_start_date = streak_perf?.streak_start_date;
-const streak_end_date = streak_perf?.streak_end_date;
+// --- Data Processing for Streak Comparison ---
+
+// Get the array result from our new SQL query
+const streak_data = streak_comparison_performance.toArray();
+
+// Find the specific objects for the current and previous streaks
+const current_streak = streak_data.find(d => d.streak_type === 'current');
+const previous_streak = streak_data.find(d => d.streak_type === 'previous');
+
+// Helper function to create a styled comparison string
+function formatComparison(current_value, previous_value, suffix = '') {
+  // If there's no previous data, don't show a comparison
+  if (previous_value === undefined || previous_value === null) return "";
+
+  const diff = current_value - previous_value;
+  const sign = diff >= 0 ? '+' : '';
+  const color = diff >= 0 ? 'var(--wata-color-profit)' : 'var(--wata-color-loss)';
+  const arrow = diff >= 0.005 ? '↗' : diff <= -0.005 ? '↘' : '→';
+
+  return html`<span style="font-size: 0.7em; color: ${color}; white-space: nowrap; margin-left: 0.5em;">
+    (${sign}${diff.toFixed(2)}${suffix} ${arrow})
+  </span>`;
+}
 ```
 
 
@@ -603,20 +677,31 @@ const streak_end_date = streak_perf?.streak_end_date;
             <td align="right">Best</td>
           </tr>
           <tr>
-            <td align="left"><span class="big">${current_streak} days</span></td>
-            <td align="right"><span class="big">${best_streak} days</span></td>
+            <!-- This card remains the same, assuming current_streak and best_streak are calculated elsewhere -->
+            <td align="left"><span class="big">${current_streak_1} days</span></td>
+            <td align="right"><span class="big">${best_streak_1} days</span></td>
           </tr>
         </table>
   </div>
   <div class="card">
     <h2>Current Streak P/L (%)</h2>
-    <h3><i>${new Date(streak_start_date).toLocaleDateString()} to ${new Date(streak_end_date).toLocaleDateString()}</i></h3>
-    <span class="big">${streak_pl_percentage.toFixed(2)}%</span>
+    <h3>
+      ${current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"}
+    </h3>
+    <span class="big" style="display: flex; align-items: baseline;">
+      ${current_streak?.streak_pl_percentage?.toFixed(2) ?? 0}%
+      ${formatComparison(current_streak?.streak_pl_percentage, previous_streak?.streak_pl_percentage, '%')}
+    </span>
   </div>
   <div class="card">
     <h2>Current Streak P/L (€)</h2>
-    <h3><i>${new Date(streak_start_date).toLocaleDateString()} to ${new Date(streak_end_date).toLocaleDateString()}</i></h3>
-    <span class="big">${streak_money_made.toFixed(2) || 0} €</span>
+    <h3>
+      ${current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"}
+    </h3>
+    <span class="big" style="display: flex; align-items: baseline;">
+      ${current_streak?.streak_money_made?.toFixed(2) ?? 0} €
+      ${formatComparison(current_streak?.streak_money_made, previous_streak?.streak_money_made, '€')}
+    </span>
   </div>
   <div class="card">
     <h2>Current balance</h2>
@@ -683,7 +768,7 @@ const time_picked = Generators.input(time_picked_input);
 # 📈 Performance stats
 
 <div class="grid grid-cols-4">
-  <div class="card">
+    <div class="card">
     <h2>Consecutive Days Without Loss</h2>
         <table>
           <tr>
@@ -691,24 +776,60 @@ const time_picked = Generators.input(time_picked_input);
             <td align="right">Best</td>
           </tr>
           <tr>
-            <td align="left"><span class="big">${current_streak} days</span></td>
-            <td align="right"><span class="big">${best_streak} days</span></td>
+            <!-- This card remains the same, assuming current_streak and best_streak are calculated elsewhere -->
+            <td align="left"><span class="big">${current_streak_1} days</span></td>
+            <td align="right"><span class="big">${best_streak_1} days</span></td>
           </tr>
         </table>
   </div>
   <div class="card">
     <h2>Current Streak P/L (%)</h2>
-    <h3><i>${new Date(streak_start_date).toLocaleDateString()} to ${new Date(streak_end_date).toLocaleDateString()}</i></h3>
-    <span class="big">${streak_pl_percentage.toFixed(2)}%</span>
+    <h3>
+      ${current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"}
+    </h3>
+    <span class="big" style="display: flex; align-items: baseline;">
+      ${current_streak?.streak_pl_percentage?.toFixed(2) ?? 0}%
+      ${formatComparison(current_streak?.streak_pl_percentage, previous_streak?.streak_pl_percentage, '%')}
+    </span>
   </div>
   <div class="card">
     <h2>Current Streak P/L (€)</h2>
-    <h3><i>${new Date(streak_start_date).toLocaleDateString()} to ${new Date(streak_end_date).toLocaleDateString()}</i></h3>
-    <span class="big">${streak_money_made.toFixed(2) || 0} €</span>
+    <h3>
+      ${current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"}
+    </h3>
+    <span class="big" style="display: flex; align-items: baseline;">
+      ${current_streak?.streak_money_made?.toFixed(2) ?? 0} €
+      ${formatComparison(current_streak?.streak_money_made, previous_streak?.streak_money_made, '€')}
+    </span>
   </div>
   <div class="card">
     <h2>Yearly Performance</h2>
     ${yearly_performance_chart()}
+  </div>
+</div>
+
+<div class="grid grid-cols-4">
+  <div class="card grid-colspan-2">${GenericPerformanceCard({
+      resize,
+      title: "Week performance per day",
+      mainData: avg_per_week,
+      valueColumn: "avg(perf_day_real)", // Note the column name from the SQL query
+      comparison4WeekValue: avg_4_week.at(0).value,
+      comparison52WeekValue: avg_52_week.at(0).value,
+      isAverage: true,
+      suffix: "per day this week"
+    })}
+  </div>
+  <div class="card grid-colspan-2">${GenericPerformanceCard({
+      resize,
+      title: "Global week performance",
+      mainData: weekly_performance_card,
+      valueColumn: "week_pl_percentage", // Use the new column name
+      comparison4WeekValue: weekly_performance_4_week.at(0).value,
+      comparison52WeekValue: weekly_performance_52_week.at(0).value,
+      isAverage: false,
+      suffix: "total this week"
+    })}
   </div>
 </div>
 
@@ -844,26 +965,34 @@ FROM trade_performance
 WHERE trade_number_real != 0
 ```
 
-```sql id=avg_per_week
-SELECT week(date_day) AS week_number, avg(perf_day_real) FROM trade_performance GROUP BY week_number ORDER BY week_number DESC
-```
 
-```sql id=avg_52_week
-SELECT 
-    AVG(perf_day_real) AS avg_52_week_performance
-FROM 
+```sql id=avg_per_week
+SELECT
+    date_trunc('week', date_day) as week_date,
+    EXTRACT(YEAR FROM date_trunc('week', date_day)) as year,
+    -- DuckDB's EXTRACT(WEEK...) is ISO standard (Monday is first day of week)
+    EXTRACT(WEEK FROM date_trunc('week', date_day)) as week_of_year, 
+    STRFTIME(date_trunc('week', date_day), 'Week %V, %Y') as week_display,
+    avg(perf_day_real)
+FROM
     trade_performance
-WHERE 
-    date_day >= (current_date - INTERVAL '52 weeks')
+WHERE
+    trade_number_real != 0
+GROUP BY
+    date_trunc('week', date_day)
+ORDER BY
+    date_trunc('week', date_day) DESC
+LIMIT 52; 
 ```
 
 ```sql id=avg_4_week
-SELECT 
-    AVG(perf_day_real) AS avg_4_week_performance
-FROM 
-    trade_performance
-WHERE 
-    date_day >= (current_date - INTERVAL '4 weeks')
+SELECT AVG(perf_day_real) AS value FROM trade_performance
+WHERE trade_number_real != 0 AND date_day >= (current_date - INTERVAL '4 weeks');
+```
+
+```sql id=avg_52_week
+SELECT AVG(perf_day_real) AS value FROM trade_performance
+WHERE trade_number_real != 0 AND date_day >= (current_date - INTERVAL '52 weeks');
 ```
 
 
@@ -872,76 +1001,6 @@ WHERE
 const tradeCounts = Object.fromEntries(
   trade_count_by_action.toArray().map(row => [row.action, row])
 );
-```
-
-```js
-function performance_card() {    
-    // Access the last and second-to-last week performance
-    const lastWeek = avg_per_week.at(0); // The most recent week
-    const secondLastWeek = avg_per_week.at(1); // The week before the most recent one
-
-    // Make sure the data exists before calculating
-    if (lastWeek && secondLastWeek) {
-        const diff1 = lastWeek["avg(perf_day_real)"] - secondLastWeek["avg(perf_day_real)"]; // Compare average performance between weeks
-        const range = d3.extent(day_performance.slice(-52), (d) => d["perf_day_real"]); // Range of last 52 weeks
-
-
-        return html.fragment`
-        <h2>Week average performance per day</h2>
-        <h1 style="color: ${lastWeek["avg(perf_day_real)"] >= 0 ? "var(--wata-color-profit)" : "var(--wata-color-loss)"}">${formatPercent(lastWeek["avg(perf_day_real)"])}</h1>
-        <table>
-          <tr>
-            <td>1-week change</td>
-            <td align="right">${formatPercent(diff1, {signDisplay: "always"})}</td>
-            <td>${trend(diff1)}</td>
-          </tr>
-          <tr>
-            <td>4-week average</td>
-            <td align="right">${formatPercent(avg_4_week.at(0)["avg_4_week_performance"])}</td>
-          </tr>
-          <tr>
-            <td>52-week average</td>
-            <td align="right">${formatPercent(avg_52_week.at(0)["avg_52_week_performance"])}</td>
-          </tr>
-        </table>
-        ${resize((width) =>
-          Plot.plot({
-            width,
-            height: 40,
-            axis: null,
-            x: {inset: 40},
-            marks: [
-              Plot.tickX(day_performance.slice(-52), {
-                x: "perf_day_real",
-                strokeOpacity: 0.5,
-                insetTop: 10,
-                insetBottom: 10,
-                title: (d) => `${d["date_day_string"]}: ${d["perf_day_real"].toFixed(2)}%`,
-                tip: {anchor: "bottom"}
-              }),
-              Plot.text([`${Math.round(range[0])}%`], {frameAnchor: "left"}),
-              Plot.text([`${Math.round(range[1])}%`], {frameAnchor: "right"})
-            ]
-          })
-        )}
-        <span class="small muted">52-week range</span>
-        `;
-    } else {
-        return html.fragment`<p>Data not available</p>`;
-    }
-}
-
-function formatPercent(value, format) {
-  return value == null
-    ? "N/A"
-    : (value / 100).toLocaleString("en-US", {minimumFractionDigits: 2, style: "percent", ...format});
-}
-
-function trend(v) {
-  return v >= 0.005 ? html`<span class="url(#profit_gradient_1)">↗︎</span>`
-    : v <= -0.005 ? html`<span class="url(#loss_gradient_1)">↘︎</span>`
-    : "→";
-}
 ```
 
 ```sql id=trade_profitability_by_price_range_data
@@ -996,7 +1055,9 @@ function trade_profitability_by_price_range() {
 }
 ```
 
-<div class="grid grid-cols-2">
+
+
+<div class="grid grid-cols-4">
   <div class="card">
     <h2>Long 📈</h2>
     <span class="big">${tradeCounts.long?.trade_count || 0}</span>
@@ -1004,7 +1065,6 @@ function trade_profitability_by_price_range() {
     <br><br>
     <span class="muted">Total Profit / Loss : ${(tradeCounts.long?.profit_loss_sum || 0).toFixed(3)}€</span>
   </div>
-  <div class="card grid-rowspan-2">${performance_card()}</div>
   <div class="card">
     <h2>Short 📉</h2>
     <span class="big">${tradeCounts.short?.trade_count || 0}</span>

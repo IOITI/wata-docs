@@ -15,11 +15,13 @@
 <link rel="modulepreload" href="./_observablehq/client.9bb31b7c.js">
 <link rel="modulepreload" href="./_observablehq/runtime.e080113b.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.111f9be1.js">
+<link rel="modulepreload" href="./_import/components/cards.49ed0877.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/e780feca.js">
 <link rel="modulepreload" href="./_observablehq/stdlib/duckdb.147b9b82.js">
 <link rel="modulepreload" href="./_npm/htl@0.3.1/72f4716c.js">
 <link rel="modulepreload" href="./_observablehq/stdlib/inputs.de641f6f.js">
 <link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/d761ef9b.js">
+<link rel="modulepreload" href="./_node/htl@0.3.1/index.0caf36e7.js">
 <link rel="modulepreload" href="./_npm/@duckdb/duckdb-wasm@1.29.0/daf159fc.js">
 <link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
 <link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
@@ -67,10 +69,16 @@ import {define} from "./_observablehq/client.9bb31b7c.js";
 import {registerFile, FileAttachment} from "./_observablehq/stdlib.111f9be1.js";
 import {registerTable} from "./_observablehq/stdlib/duckdb.147b9b82.js";
 
-registerFile("./trade_performance.parquet", {"name":"./trade_performance.parquet","path":"./_file/trade_performance.9db37f17.parquet","lastModified":1753601277836,"size":10087});
-registerFile("./turbo_data_position.parquet", {"name":"./turbo_data_position.parquet","path":"./_file/turbo_data_position.4c01e62c.parquet","lastModified":1753601277837,"size":140059});
+registerFile("./trade_performance.parquet", {"name":"./trade_performance.parquet","path":"./_file/trade_performance.535bcc50.parquet","lastModified":1753604033936,"size":10249});
+registerFile("./turbo_data_position.parquet", {"name":"./turbo_data_position.parquet","path":"./_file/turbo_data_position.33801981.parquet","lastModified":1753604033937,"size":99231});
 registerTable("turbo_data_position", FileAttachment("./turbo_data_position.parquet"));
 registerTable("trade_performance", FileAttachment("./trade_performance.parquet"));
+
+define({id: "9ff6a6f2", outputs: ["GenericPerformanceCard"], body: async () => {
+const {GenericPerformanceCard} = await import("./_import/components/cards.49ed0877.js");
+
+return {GenericPerformanceCard};
+}});
 
 define({id: "a1f00bc2", inputs: ["sql"], outputs: ["profit_loss_data_full_time"], body: async (sql) => {
 const profit_loss_data_full_time = await sql`SELECT strptime(strftime(execution_time_close, '%Y/%m/%d'), '%Y/%m/%d') AS day_date,
@@ -120,8 +128,8 @@ GROUP BY year`;
 return {profit_loss_by_year_flat_tax};
 }});
 
-define({id: "6cd6a67c", inputs: ["sql"], outputs: ["streak_data"], body: async (sql) => {
-const streak_data = await sql`WITH profitable_days AS (
+define({id: "73220af3", inputs: ["sql"], outputs: ["streak_data_all"], body: async (sql) => {
+const streak_data_all = await sql`WITH profitable_days AS (
     SELECT 
         strptime(strftime(execution_time_close, '%Y/%m/%d'), '%Y/%m/%d') AS day_date,
         CASE WHEN SUM(position_profit_loss) > 0 THEN 1 ELSE 0 END AS is_profitable_day
@@ -155,7 +163,7 @@ SELECT
                         WHERE is_profitable_day = 0)
     ) AS current_streak
 FROM streak_lengths;`;
-return {streak_data};
+return {streak_data_all};
 }});
 
 define({id: "8d23b2e2", inputs: ["sql"], outputs: ["candle_profit_data"], body: async (sql) => {
@@ -216,10 +224,10 @@ ORDER BY Date;`;
 return {candle_profit_data};
 }});
 
-define({id: "cc14e825", inputs: ["streak_data"], outputs: ["best_streak","current_streak"], body: (streak_data) => {
-const best_streak = streak_data.get(0).best_streak;
-const current_streak = streak_data.get(0).current_streak;
-return {best_streak,current_streak};
+define({id: "7ffe9f8d", inputs: ["streak_data_all"], outputs: ["best_streak_1","current_streak_1"], body: (streak_data_all) => {
+const best_streak_1 = streak_data_all.get(0).best_streak;
+const current_streak_1 = streak_data_all.get(0).current_streak;
+return {best_streak_1,current_streak_1};
 }});
 
 define({id: "f2c1e942", inputs: ["sql","time_picked"], outputs: ["profit_loss_data_time_picked","cumulative_profit_loss_data_time_picked"], body: async (sql,time_picked) => {
@@ -434,6 +442,34 @@ ORDER BY
 return {monthly_performance};
 }});
 
+define({id: "313b44ca", inputs: ["sql"], outputs: ["weekly_performance_card"], body: async (sql) => {
+const weekly_performance_card = await sql`SELECT
+    date_trunc('week', execution_time_close) as week_date,
+    STRFTIME(date_trunc('week', execution_time_close), 'Week %V, %Y') as week_display,
+    (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 AS week_pl_percentage
+FROM turbo_data_position
+GROUP BY 1
+ORDER BY 1 DESC
+LIMIT 52;`;
+return {weekly_performance_card};
+}});
+
+define({id: "80583887", inputs: ["sql"], outputs: ["weekly_performance_4_week"], body: async (sql) => {
+const weekly_performance_4_week = await sql`SELECT
+    (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 as value
+FROM turbo_data_position
+WHERE execution_time_close >= (current_date - INTERVAL '4 weeks');`;
+return {weekly_performance_4_week};
+}});
+
+define({id: "73c19fa8", inputs: ["sql"], outputs: ["weekly_performance_52_week"], body: async (sql) => {
+const weekly_performance_52_week = await sql`SELECT
+    (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 as value
+FROM turbo_data_position
+WHERE execution_time_close >= (current_date - INTERVAL '52 weeks');`;
+return {weekly_performance_52_week};
+}});
+
 define({id: "c338540c", inputs: ["sql"], outputs: ["weekly_performance"], body: async (sql) => {
 const weekly_performance = await sql`SELECT
     date_trunc('week', execution_time_close) as week_date,
@@ -629,88 +665,132 @@ function weekly_performance_chart() {
 return {yearly_performance_chart,monthly_performance_chart,weekly_performance_chart};
 }});
 
-define({id: "17ffb2ea", inputs: ["sql"], outputs: ["current_streak_performance"], body: async (sql) => {
-const current_streak_performance = await sql`WITH profitable_days AS (
+define({id: "342bdf65", inputs: ["sql"], outputs: ["streak_comparison_performance"], body: async (sql) => {
+const streak_comparison_performance = await sql`-- CTE 1: Identify profitable and non-profitable days
+WITH profitable_days AS (
     SELECT 
         date_trunc('day', execution_time_close) AS day_date,
         CASE WHEN SUM(position_profit_loss) > 0 THEN 1 ELSE 0 END AS is_profitable_day
     FROM turbo_data_position
     WHERE position_status = 'Closed'
     GROUP BY day_date
+),
+-- CTE 2: Find the key dates that define our streak boundaries
+streak_boundaries AS (
+    SELECT
+        -- Find the last day that was NOT profitable.
+        (SELECT MAX(day_date) FROM profitable_days WHERE is_profitable_day = 0) AS last_losing_day,
+        -- Find the second-to-last day that was NOT profitable.
+        (SELECT day_date FROM profitable_days WHERE is_profitable_day = 0 ORDER BY day_date DESC LIMIT 1 OFFSET 1) AS second_to_last_losing_day
 )
+-- Part 1: Calculate metrics for the CURRENT streak
 SELECT 
+    'current' AS streak_type,
     SUM(position_profit_loss) AS streak_money_made,
     (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 AS streak_pl_percentage,
-    MIN(execution_time_close) AS streak_start_date, -- New: Get the first transaction time of the streak
-    MAX(execution_time_close) AS streak_end_date   -- New: Get the last transaction time of the streak
-FROM turbo_data_position
+    MIN(execution_time_close) AS streak_start_date,
+    MAX(execution_time_close) AS streak_end_date
+FROM 
+    turbo_data_position, streak_boundaries
 WHERE 
     position_status = 'Closed' 
-    AND date_trunc('day', execution_time_close) > (
-        -- Find the last day that was NOT profitable. The current streak starts the day after.
-        -- We use COALESCE to handle the case where there has never been a losing day.
-        SELECT COALESCE(MAX(day_date), '1970-01-01'::DATE)
-        FROM profitable_days
-        WHERE is_profitable_day = 0
-    )`;
-return {current_streak_performance};
+    -- The current streak includes all data AFTER the last losing day.
+    -- We use COALESCE to handle the case where there has never been a losing day.
+    AND date_trunc('day', execution_time_close) > COALESCE(streak_boundaries.last_losing_day, '1970-01-01'::DATE)
+
+UNION ALL
+
+-- Part 2: Calculate metrics for the PREVIOUS streak
+SELECT 
+    'previous' AS streak_type,
+    SUM(position_profit_loss) AS streak_money_made,
+    (PRODUCT(1 + position_total_performance_percent / 100.0) - 1) * 100 AS streak_pl_percentage,
+    MIN(execution_time_close) AS streak_start_date,
+    MAX(execution_time_close) AS streak_end_date
+FROM 
+    turbo_data_position, streak_boundaries
+WHERE 
+    position_status = 'Closed' 
+    -- The previous streak is only valid if we have at least two losing days to create a boundary.
+    AND streak_boundaries.second_to_last_losing_day IS NOT NULL
+    -- The data must be BETWEEN the second-to-last and last losing days.
+    AND date_trunc('day', execution_time_close) > streak_boundaries.second_to_last_losing_day
+    AND date_trunc('day', execution_time_close) < streak_boundaries.last_losing_day;`;
+return {streak_comparison_performance};
 }});
 
-define({id: "143aa6af", inputs: ["current_streak_performance"], outputs: ["streak_perf","streak_money_made","streak_pl_percentage","streak_start_date","streak_end_date"], body: (current_streak_performance) => {
-// --- Data for Current Streak Performance ---
-const streak_perf = current_streak_performance.get(0);
-const streak_money_made = streak_perf?.streak_money_made ?? 0;
-const streak_pl_percentage = streak_perf?.streak_pl_percentage ?? 0;
-const streak_start_date = streak_perf?.streak_start_date;
-const streak_end_date = streak_perf?.streak_end_date;
-return {streak_perf,streak_money_made,streak_pl_percentage,streak_start_date,streak_end_date};
+define({id: "92c04d43", inputs: ["streak_comparison_performance","html"], outputs: ["streak_data","current_streak","previous_streak","formatComparison"], body: (streak_comparison_performance,html) => {
+// --- Data Processing for Streak Comparison ---
+
+// Get the array result from our new SQL query
+const streak_data = streak_comparison_performance.toArray();
+
+// Find the specific objects for the current and previous streaks
+const current_streak = streak_data.find(d => d.streak_type === 'current');
+const previous_streak = streak_data.find(d => d.streak_type === 'previous');
+
+// Helper function to create a styled comparison string
+function formatComparison(current_value, previous_value, suffix = '') {
+  // If there's no previous data, don't show a comparison
+  if (previous_value === undefined || previous_value === null) return "";
+
+  const diff = current_value - previous_value;
+  const sign = diff >= 0 ? '+' : '';
+  const color = diff >= 0 ? 'var(--wata-color-profit)' : 'var(--wata-color-loss)';
+  const arrow = diff >= 0.005 ? '↗' : diff <= -0.005 ? '↘' : '→';
+
+  return html`<span style="font-size: 0.7em; color: ${color}; white-space: nowrap; margin-left: 0.5em;">
+    (${sign}${diff.toFixed(2)}${suffix} ${arrow})
+  </span>`;
+}
+return {streak_data,current_streak,previous_streak,formatComparison};
 }});
 
-define({id: "cf5c2edd", mode: "inline", inputs: ["current_streak","display"], body: async (current_streak,display) => {
+define({id: "6bd14a54", mode: "inline", inputs: ["current_streak_1","display"], body: async (current_streak_1,display) => {
 display(await(
-current_streak
+current_streak_1
 ))
 }});
 
-define({id: "6c4d7fa9", mode: "inline", inputs: ["best_streak","display"], body: async (best_streak,display) => {
+define({id: "a1da1687", mode: "inline", inputs: ["best_streak_1","display"], body: async (best_streak_1,display) => {
 display(await(
-best_streak
+best_streak_1
 ))
 }});
 
-define({id: "ee85e45a", mode: "inline", inputs: ["streak_start_date","display"], body: async (streak_start_date,display) => {
+define({id: "86f90ef3", mode: "inline", inputs: ["current_streak","html","display"], body: async (current_streak,html,display) => {
 display(await(
-new Date(streak_start_date).toLocaleDateString()
+current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"
 ))
 }});
 
-define({id: "b8d84088", mode: "inline", inputs: ["streak_end_date","display"], body: async (streak_end_date,display) => {
+define({id: "1dc91870", mode: "inline", inputs: ["current_streak","display"], body: async (current_streak,display) => {
 display(await(
-new Date(streak_end_date).toLocaleDateString()
+current_streak?.streak_pl_percentage?.toFixed(2) ?? 0
 ))
 }});
 
-define({id: "a3fb60be", mode: "inline", inputs: ["streak_pl_percentage","display"], body: async (streak_pl_percentage,display) => {
+define({id: "3ef7fe66", mode: "inline", inputs: ["formatComparison","current_streak","previous_streak","display"], body: async (formatComparison,current_streak,previous_streak,display) => {
 display(await(
-streak_pl_percentage.toFixed(2)
+formatComparison(current_streak?.streak_pl_percentage, previous_streak?.streak_pl_percentage, '%')
 ))
 }});
 
-define({id: "ee85e45a-1", mode: "inline", inputs: ["streak_start_date","display"], body: async (streak_start_date,display) => {
+define({id: "86f90ef3-1", mode: "inline", inputs: ["current_streak","html","display"], body: async (current_streak,html,display) => {
 display(await(
-new Date(streak_start_date).toLocaleDateString()
+current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"
 ))
 }});
 
-define({id: "b8d84088-1", mode: "inline", inputs: ["streak_end_date","display"], body: async (streak_end_date,display) => {
+define({id: "259da2b3", mode: "inline", inputs: ["current_streak","display"], body: async (current_streak,display) => {
 display(await(
-new Date(streak_end_date).toLocaleDateString()
+current_streak?.streak_money_made?.toFixed(2) ?? 0
 ))
 }});
 
-define({id: "084b8203", mode: "inline", inputs: ["streak_money_made","display"], body: async (streak_money_made,display) => {
+define({id: "f5a9a186", mode: "inline", inputs: ["formatComparison","current_streak","previous_streak","display"], body: async (formatComparison,current_streak,previous_streak,display) => {
 display(await(
-streak_money_made.toFixed(2) || 0
+formatComparison(current_streak?.streak_money_made, previous_streak?.streak_money_made, '€')
 ))
 }});
 
@@ -799,57 +879,87 @@ candle_profit_loss_over_time()
 ))
 }});
 
-define({id: "cf5c2edd-1", mode: "inline", inputs: ["current_streak","display"], body: async (current_streak,display) => {
+define({id: "6bd14a54-1", mode: "inline", inputs: ["current_streak_1","display"], body: async (current_streak_1,display) => {
 display(await(
-current_streak
+current_streak_1
 ))
 }});
 
-define({id: "6c4d7fa9-1", mode: "inline", inputs: ["best_streak","display"], body: async (best_streak,display) => {
+define({id: "a1da1687-1", mode: "inline", inputs: ["best_streak_1","display"], body: async (best_streak_1,display) => {
 display(await(
-best_streak
+best_streak_1
 ))
 }});
 
-define({id: "ee85e45a-2", mode: "inline", inputs: ["streak_start_date","display"], body: async (streak_start_date,display) => {
+define({id: "86f90ef3-2", mode: "inline", inputs: ["current_streak","html","display"], body: async (current_streak,html,display) => {
 display(await(
-new Date(streak_start_date).toLocaleDateString()
+current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"
 ))
 }});
 
-define({id: "b8d84088-2", mode: "inline", inputs: ["streak_end_date","display"], body: async (streak_end_date,display) => {
+define({id: "1dc91870-1", mode: "inline", inputs: ["current_streak","display"], body: async (current_streak,display) => {
 display(await(
-new Date(streak_end_date).toLocaleDateString()
+current_streak?.streak_pl_percentage?.toFixed(2) ?? 0
 ))
 }});
 
-define({id: "a3fb60be-1", mode: "inline", inputs: ["streak_pl_percentage","display"], body: async (streak_pl_percentage,display) => {
+define({id: "3ef7fe66-1", mode: "inline", inputs: ["formatComparison","current_streak","previous_streak","display"], body: async (formatComparison,current_streak,previous_streak,display) => {
 display(await(
-streak_pl_percentage.toFixed(2)
+formatComparison(current_streak?.streak_pl_percentage, previous_streak?.streak_pl_percentage, '%')
 ))
 }});
 
-define({id: "ee85e45a-3", mode: "inline", inputs: ["streak_start_date","display"], body: async (streak_start_date,display) => {
+define({id: "86f90ef3-3", mode: "inline", inputs: ["current_streak","html","display"], body: async (current_streak,html,display) => {
 display(await(
-new Date(streak_start_date).toLocaleDateString()
+current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"
 ))
 }});
 
-define({id: "b8d84088-3", mode: "inline", inputs: ["streak_end_date","display"], body: async (streak_end_date,display) => {
+define({id: "259da2b3-1", mode: "inline", inputs: ["current_streak","display"], body: async (current_streak,display) => {
 display(await(
-new Date(streak_end_date).toLocaleDateString()
+current_streak?.streak_money_made?.toFixed(2) ?? 0
 ))
 }});
 
-define({id: "084b8203-1", mode: "inline", inputs: ["streak_money_made","display"], body: async (streak_money_made,display) => {
+define({id: "f5a9a186-1", mode: "inline", inputs: ["formatComparison","current_streak","previous_streak","display"], body: async (formatComparison,current_streak,previous_streak,display) => {
 display(await(
-streak_money_made.toFixed(2) || 0
+formatComparison(current_streak?.streak_money_made, previous_streak?.streak_money_made, '€')
 ))
 }});
 
 define({id: "56d2277c", mode: "inline", inputs: ["yearly_performance_chart","display"], body: async (yearly_performance_chart,display) => {
 display(await(
 yearly_performance_chart()
+))
+}});
+
+define({id: "6515fcb8", mode: "inline", inputs: ["GenericPerformanceCard","resize","avg_per_week","avg_4_week","avg_52_week","display"], body: async (GenericPerformanceCard,resize,avg_per_week,avg_4_week,avg_52_week,display) => {
+display(await(
+GenericPerformanceCard({
+      resize,
+      title: "Week performance per day",
+      mainData: avg_per_week,
+      valueColumn: "avg(perf_day_real)", // Note the column name from the SQL query
+      comparison4WeekValue: avg_4_week.at(0).value,
+      comparison52WeekValue: avg_52_week.at(0).value,
+      isAverage: true,
+      suffix: "per day this week"
+    })
+))
+}});
+
+define({id: "a6385abf", mode: "inline", inputs: ["GenericPerformanceCard","resize","weekly_performance_card","weekly_performance_4_week","weekly_performance_52_week","display"], body: async (GenericPerformanceCard,resize,weekly_performance_card,weekly_performance_4_week,weekly_performance_52_week,display) => {
+display(await(
+GenericPerformanceCard({
+      resize,
+      title: "Global week performance",
+      mainData: weekly_performance_card,
+      valueColumn: "week_pl_percentage", // Use the new column name
+      comparison4WeekValue: weekly_performance_4_week.at(0).value,
+      comparison52WeekValue: weekly_performance_52_week.at(0).value,
+      isAverage: false,
+      suffix: "total this week"
+    })
 ))
 }});
 
@@ -985,29 +1095,36 @@ WHERE trade_number_real != 0`;
 return {day_performance};
 }});
 
-define({id: "8debe467", inputs: ["sql"], outputs: ["avg_per_week"], body: async (sql) => {
-const avg_per_week = await sql`SELECT week(date_day) AS week_number, avg(perf_day_real) FROM trade_performance GROUP BY week_number ORDER BY week_number DESC`;
+define({id: "e4128c50", inputs: ["sql"], outputs: ["avg_per_week"], body: async (sql) => {
+const avg_per_week = await sql`SELECT
+    date_trunc('week', date_day) as week_date,
+    EXTRACT(YEAR FROM date_trunc('week', date_day)) as year,
+    -- DuckDB's EXTRACT(WEEK...) is ISO standard (Monday is first day of week)
+    EXTRACT(WEEK FROM date_trunc('week', date_day)) as week_of_year, 
+    STRFTIME(date_trunc('week', date_day), 'Week %V, %Y') as week_display,
+    avg(perf_day_real)
+FROM
+    trade_performance
+WHERE
+    trade_number_real != 0
+GROUP BY
+    date_trunc('week', date_day)
+ORDER BY
+    date_trunc('week', date_day) DESC
+LIMIT 52; `;
 return {avg_per_week};
 }});
 
-define({id: "359867f0", inputs: ["sql"], outputs: ["avg_52_week"], body: async (sql) => {
-const avg_52_week = await sql`SELECT 
-    AVG(perf_day_real) AS avg_52_week_performance
-FROM 
-    trade_performance
-WHERE 
-    date_day >= (current_date - INTERVAL '52 weeks')`;
-return {avg_52_week};
+define({id: "faa82cf6", inputs: ["sql"], outputs: ["avg_4_week"], body: async (sql) => {
+const avg_4_week = await sql`SELECT AVG(perf_day_real) AS value FROM trade_performance
+WHERE trade_number_real != 0 AND date_day >= (current_date - INTERVAL '4 weeks');`;
+return {avg_4_week};
 }});
 
-define({id: "f92b11ec", inputs: ["sql"], outputs: ["avg_4_week"], body: async (sql) => {
-const avg_4_week = await sql`SELECT 
-    AVG(perf_day_real) AS avg_4_week_performance
-FROM 
-    trade_performance
-WHERE 
-    date_day >= (current_date - INTERVAL '4 weeks')`;
-return {avg_4_week};
+define({id: "818ed3de", inputs: ["sql"], outputs: ["avg_52_week"], body: async (sql) => {
+const avg_52_week = await sql`SELECT AVG(perf_day_real) AS value FROM trade_performance
+WHERE trade_number_real != 0 AND date_day >= (current_date - INTERVAL '52 weeks');`;
+return {avg_52_week};
 }});
 
 define({id: "be1a174f", inputs: ["trade_count_by_action"], outputs: ["tradeCounts"], body: (trade_count_by_action) => {
@@ -1016,77 +1133,6 @@ const tradeCounts = Object.fromEntries(
   trade_count_by_action.toArray().map(row => [row.action, row])
 );
 return {tradeCounts};
-}});
-
-define({id: "8a0c2a47", inputs: ["avg_per_week","d3","day_performance","html","avg_4_week","avg_52_week","resize","Plot"], outputs: ["performance_card","formatPercent","trend"], body: (avg_per_week,d3,day_performance,html,avg_4_week,avg_52_week,resize,Plot) => {
-function performance_card() {    
-    // Access the last and second-to-last week performance
-    const lastWeek = avg_per_week.at(0); // The most recent week
-    const secondLastWeek = avg_per_week.at(1); // The week before the most recent one
-
-    // Make sure the data exists before calculating
-    if (lastWeek && secondLastWeek) {
-        const diff1 = lastWeek["avg(perf_day_real)"] - secondLastWeek["avg(perf_day_real)"]; // Compare average performance between weeks
-        const range = d3.extent(day_performance.slice(-52), (d) => d["perf_day_real"]); // Range of last 52 weeks
-
-
-        return html.fragment`
-        <h2>Week average performance per day</h2>
-        <h1 style="color: ${lastWeek["avg(perf_day_real)"] >= 0 ? "var(--wata-color-profit)" : "var(--wata-color-loss)"}">${formatPercent(lastWeek["avg(perf_day_real)"])}</h1>
-        <table>
-          <tr>
-            <td>1-week change</td>
-            <td align="right">${formatPercent(diff1, {signDisplay: "always"})}</td>
-            <td>${trend(diff1)}</td>
-          </tr>
-          <tr>
-            <td>4-week average</td>
-            <td align="right">${formatPercent(avg_4_week.at(0)["avg_4_week_performance"])}</td>
-          </tr>
-          <tr>
-            <td>52-week average</td>
-            <td align="right">${formatPercent(avg_52_week.at(0)["avg_52_week_performance"])}</td>
-          </tr>
-        </table>
-        ${resize((width) =>
-          Plot.plot({
-            width,
-            height: 40,
-            axis: null,
-            x: {inset: 40},
-            marks: [
-              Plot.tickX(day_performance.slice(-52), {
-                x: "perf_day_real",
-                strokeOpacity: 0.5,
-                insetTop: 10,
-                insetBottom: 10,
-                title: (d) => `${d["date_day_string"]}: ${d["perf_day_real"].toFixed(2)}%`,
-                tip: {anchor: "bottom"}
-              }),
-              Plot.text([`${Math.round(range[0])}%`], {frameAnchor: "left"}),
-              Plot.text([`${Math.round(range[1])}%`], {frameAnchor: "right"})
-            ]
-          })
-        )}
-        <span class="small muted">52-week range</span>
-        `;
-    } else {
-        return html.fragment`<p>Data not available</p>`;
-    }
-}
-
-function formatPercent(value, format) {
-  return value == null
-    ? "N/A"
-    : (value / 100).toLocaleString("en-US", {minimumFractionDigits: 2, style: "percent", ...format});
-}
-
-function trend(v) {
-  return v >= 0.005 ? html`<span class="url(#profit_gradient_1)">↗︎</span>`
-    : v <= -0.005 ? html`<span class="url(#loss_gradient_1)">↘︎</span>`
-    : "→";
-}
-return {performance_card,formatPercent,trend};
 }});
 
 define({id: "0800a465", inputs: ["sql"], outputs: ["trade_profitability_by_price_range_data"], body: async (sql) => {
@@ -1158,12 +1204,6 @@ display(await(
 define({id: "9b95303f", mode: "inline", inputs: ["tradeCounts","display"], body: async (tradeCounts,display) => {
 display(await(
 (tradeCounts.long?.profit_loss_sum || 0).toFixed(3)
-))
-}});
-
-define({id: "13e9458b", mode: "inline", inputs: ["performance_card","display"], body: async (performance_card,display) => {
-display(await(
-performance_card()
 ))
 }});
 
@@ -1323,20 +1363,24 @@ return {trade_performance_table};
 <body>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
+<div class="observablehq observablehq--block"><!--:9ff6a6f2:--></div>
 <div class="observablehq observablehq--block"><!--:a1f00bc2:--></div>
 <div class="observablehq observablehq--block"><!--:a824cc9a:--></div>
 <div class="observablehq observablehq--block"><!--:bdcccfc1:--></div>
-<div class="observablehq observablehq--block"><!--:6cd6a67c:--></div>
+<div class="observablehq observablehq--block"><!--:73220af3:--></div>
 <div class="observablehq observablehq--block"><!--:8d23b2e2:--></div>
-<div class="observablehq observablehq--block"><!--:cc14e825:--></div>
+<div class="observablehq observablehq--block"><!--:7ffe9f8d:--></div>
 <div class="observablehq observablehq--block"><!--:f2c1e942:--></div>
 <div class="observablehq observablehq--block"><!--:508313e6:--></div>
 <div class="observablehq observablehq--block"><!--:0a2997d5:--></div>
 <div class="observablehq observablehq--block"><!--:4e70c62c:--></div>
+<div class="observablehq observablehq--block"><!--:313b44ca:--></div>
+<div class="observablehq observablehq--block"><!--:80583887:--></div>
+<div class="observablehq observablehq--block"><!--:73c19fa8:--></div>
 <div class="observablehq observablehq--block"><!--:c338540c:--></div>
 <div class="observablehq observablehq--block"><!--:14bfcc3b:--></div>
-<div class="observablehq observablehq--block"><!--:17ffb2ea:--></div>
-<div class="observablehq observablehq--block"><!--:143aa6af:--></div>
+<div class="observablehq observablehq--block"><!--:342bdf65:--></div>
+<div class="observablehq observablehq--block"><!--:92c04d43:--></div>
 <h1 id="highlights" tabindex="-1"><a class="observablehq-header-anchor" href="#highlights">✨ Highlights</a></h1>
 <div class="grid grid-cols-4">
   <div class="card">
@@ -1347,20 +1391,31 @@ return {trade_performance_table};
             <td align="right">Best</td>
           </tr>
           <tr>
-            <td align="left"><span class="big"><observablehq-loading></observablehq-loading><!--:cf5c2edd:--> days</span></td>
-            <td align="right"><span class="big"><observablehq-loading></observablehq-loading><!--:6c4d7fa9:--> days</span></td>
+            <!-- This card remains the same, assuming current_streak and best_streak are calculated elsewhere -->
+            <td align="left"><span class="big"><observablehq-loading></observablehq-loading><!--:6bd14a54:--> days</span></td>
+            <td align="right"><span class="big"><observablehq-loading></observablehq-loading><!--:a1da1687:--> days</span></td>
           </tr>
         </tbody></table>
   </div>
   <div class="card">
     <h2>Current Streak P/L (%)</h2>
-    <h3><i><observablehq-loading></observablehq-loading><!--:ee85e45a:--> to <observablehq-loading></observablehq-loading><!--:b8d84088:--></i></h3>
-    <span class="big"><observablehq-loading></observablehq-loading><!--:a3fb60be:-->%</span>
+    <h3>
+      <observablehq-loading></observablehq-loading><!--:86f90ef3:-->
+    </h3>
+    <span class="big" style="display: flex; align-items: baseline;">
+      <observablehq-loading></observablehq-loading><!--:1dc91870:-->%
+      <observablehq-loading></observablehq-loading><!--:3ef7fe66:-->
+    </span>
   </div>
   <div class="card">
     <h2>Current Streak P/L (€)</h2>
-    <h3><i><observablehq-loading></observablehq-loading><!--:ee85e45a-1:--> to <observablehq-loading></observablehq-loading><!--:b8d84088-1:--></i></h3>
-    <span class="big"><observablehq-loading></observablehq-loading><!--:084b8203:--> €</span>
+    <h3>
+      <observablehq-loading></observablehq-loading><!--:86f90ef3-1:-->
+    </h3>
+    <span class="big" style="display: flex; align-items: baseline;">
+      <observablehq-loading></observablehq-loading><!--:259da2b3:--> €
+      <observablehq-loading></observablehq-loading><!--:f5a9a186:-->
+    </span>
   </div>
   <div class="card">
     <h2>Current balance</h2>
@@ -1410,7 +1465,7 @@ return {trade_performance_table};
 <hr>
 <h1 id="performance-stats" tabindex="-1"><a class="observablehq-header-anchor" href="#performance-stats">📈 Performance stats</a></h1>
 <div class="grid grid-cols-4">
-  <div class="card">
+    <div class="card">
     <h2>Consecutive Days Without Loss</h2>
         <table>
           <tbody><tr>
@@ -1418,24 +1473,41 @@ return {trade_performance_table};
             <td align="right">Best</td>
           </tr>
           <tr>
-            <td align="left"><span class="big"><observablehq-loading></observablehq-loading><!--:cf5c2edd-1:--> days</span></td>
-            <td align="right"><span class="big"><observablehq-loading></observablehq-loading><!--:6c4d7fa9-1:--> days</span></td>
+            <!-- This card remains the same, assuming current_streak and best_streak are calculated elsewhere -->
+            <td align="left"><span class="big"><observablehq-loading></observablehq-loading><!--:6bd14a54-1:--> days</span></td>
+            <td align="right"><span class="big"><observablehq-loading></observablehq-loading><!--:a1da1687-1:--> days</span></td>
           </tr>
         </tbody></table>
   </div>
   <div class="card">
     <h2>Current Streak P/L (%)</h2>
-    <h3><i><observablehq-loading></observablehq-loading><!--:ee85e45a-2:--> to <observablehq-loading></observablehq-loading><!--:b8d84088-2:--></i></h3>
-    <span class="big"><observablehq-loading></observablehq-loading><!--:a3fb60be-1:-->%</span>
+    <h3>
+      <observablehq-loading></observablehq-loading><!--:86f90ef3-2:-->
+    </h3>
+    <span class="big" style="display: flex; align-items: baseline;">
+      <observablehq-loading></observablehq-loading><!--:1dc91870-1:-->%
+      <observablehq-loading></observablehq-loading><!--:3ef7fe66-1:-->
+    </span>
   </div>
   <div class="card">
     <h2>Current Streak P/L (€)</h2>
-    <h3><i><observablehq-loading></observablehq-loading><!--:ee85e45a-3:--> to <observablehq-loading></observablehq-loading><!--:b8d84088-3:--></i></h3>
-    <span class="big"><observablehq-loading></observablehq-loading><!--:084b8203-1:--> €</span>
+    <h3>
+      <observablehq-loading></observablehq-loading><!--:86f90ef3-3:-->
+    </h3>
+    <span class="big" style="display: flex; align-items: baseline;">
+      <observablehq-loading></observablehq-loading><!--:259da2b3-1:--> €
+      <observablehq-loading></observablehq-loading><!--:f5a9a186-1:-->
+    </span>
   </div>
   <div class="card">
     <h2>Yearly Performance</h2>
     <observablehq-loading></observablehq-loading><!--:56d2277c:-->
+  </div>
+</div>
+<div class="grid grid-cols-4">
+  <div class="card grid-colspan-2"><observablehq-loading></observablehq-loading><!--:6515fcb8:-->
+  </div>
+  <div class="card grid-colspan-2"><observablehq-loading></observablehq-loading><!--:a6385abf:-->
   </div>
 </div>
 <div class="grid grid-cols-4" style="margin-top: 2rem;">
@@ -1461,14 +1533,13 @@ return {trade_performance_table};
 <h1 id="trade-postions-stats" tabindex="-1"><a class="observablehq-header-anchor" href="#trade-postions-stats">📊 Trade postions stats</a></h1>
 <div class="observablehq observablehq--block"><!--:43dde04b:--></div>
 <div class="observablehq observablehq--block"><!--:e107c7f4:--></div>
-<div class="observablehq observablehq--block"><!--:8debe467:--></div>
-<div class="observablehq observablehq--block"><!--:359867f0:--></div>
-<div class="observablehq observablehq--block"><!--:f92b11ec:--></div>
+<div class="observablehq observablehq--block"><!--:e4128c50:--></div>
+<div class="observablehq observablehq--block"><!--:faa82cf6:--></div>
+<div class="observablehq observablehq--block"><!--:818ed3de:--></div>
 <div class="observablehq observablehq--block"><!--:be1a174f:--></div>
-<div class="observablehq observablehq--block"><!--:8a0c2a47:--></div>
 <div class="observablehq observablehq--block"><!--:0800a465:--></div>
 <div class="observablehq observablehq--block"><!--:bd64845e:--></div>
-<div class="grid grid-cols-2">
+<div class="grid grid-cols-4">
   <div class="card">
     <h2>Long 📈</h2>
     <span class="big"><observablehq-loading></observablehq-loading><!--:65b7a834:--></span>
@@ -1476,7 +1547,6 @@ return {trade_performance_table};
     <br><br>
     <span class="muted">Total Profit / Loss : <observablehq-loading></observablehq-loading><!--:9b95303f:-->€</span>
   </div>
-  <div class="card grid-rowspan-2"><observablehq-loading></observablehq-loading><!--:13e9458b:--></div>
   <div class="card">
     <h2>Short 📉</h2>
     <span class="big"><observablehq-loading></observablehq-loading><!--:81460703:--></span>
@@ -1608,7 +1678,7 @@ h1, h2, h3 {
 
 </style></main>
 <footer id="observablehq-footer">
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-07-27T07:28:07">Jul 27, 2025</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-07-27T08:14:03">Jul 27, 2025</a>.</div>
 </footer>
 </div>
 </body>

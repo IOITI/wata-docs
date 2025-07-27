@@ -1,5 +1,5 @@
 import * as Plot from "npm:@observablehq/plot";
-import * as d3 from "d3";
+import * as d3 from "npm:d3";
 import {html} from "htl";
 
 /**

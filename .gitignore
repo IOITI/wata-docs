@@ -23,3 +23,4 @@ yarn-error.log*
 
 observable-framework/dist/
 observable-framework/node_modules/
+/static/performance-chart

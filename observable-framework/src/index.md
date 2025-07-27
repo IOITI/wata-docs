@@ -684,7 +684,7 @@ function formatComparison(current_value, previous_value, suffix = '') {
         </table>
   </div>
   <div class="card">
-    <h2>Current Streak P/L (%)</h2>
+    <h2>Current vs Last Streak P/L (%)</h2>
     <h3>
       ${current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"}
     </h3>
@@ -694,7 +694,7 @@ function formatComparison(current_value, previous_value, suffix = '') {
     </span>
   </div>
   <div class="card">
-    <h2>Current Streak P/L (€)</h2>
+    <h2>Current vs Last Streak P/L (€)</h2>
     <h3>
       ${current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"}
     </h3>
@@ -783,7 +783,7 @@ const time_picked = Generators.input(time_picked_input);
         </table>
   </div>
   <div class="card">
-    <h2>Current Streak P/L (%)</h2>
+    <h2>Current vs Last Streak P/L (%)</h2>
     <h3>
       ${current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"}
     </h3>
@@ -793,7 +793,7 @@ const time_picked = Generators.input(time_picked_input);
     </span>
   </div>
   <div class="card">
-    <h2>Current Streak P/L (€)</h2>
+    <h2>Current vs Last Streak P/L (€)</h2>
     <h3>
       ${current_streak ? html`<i>${new Date(current_streak.streak_start_date).toLocaleDateString()} to ${new Date(current_streak.streak_end_date).toLocaleDateString()}</i>` : "No active streak"}
     </h3>
